@@ -399,6 +399,22 @@
   },
   {
     "ContainingType": "CarePlanController",
+    "Method": "DeleteUserCarePlan",
+    "RelativePath": "api/CarePlan/DeleteUserCarePlan/{userId}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CarePlanController",
     "Method": "GetCarePlan",
     "RelativePath": "api/CarePlan/GetCarePlan",
     "HttpMethod": "POST",
@@ -1223,6 +1239,16 @@
     ]
   },
   {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "TestEmail",
+    "RelativePath": "api/Payments/test-email",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "BeautySky.Controllers.ProductsController",
     "Method": "GetProducts",
     "RelativePath": "api/Products",
@@ -1415,6 +1441,22 @@
     "Method": "DeleteProduct",
     "RelativePath": "api/Products/{id}",
     "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.ProductsController",
+    "Method": "ReactivateProduct",
+    "RelativePath": "api/Products/reactivate/{id}",
+    "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [

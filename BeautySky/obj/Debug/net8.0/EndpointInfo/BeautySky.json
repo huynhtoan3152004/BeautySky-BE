@@ -735,6 +735,29 @@
         }
       }
     },
+    "/api/CarePlan/DeleteUserCarePlan/{userId}": {
+      "delete": {
+        "tags": [
+          "CarePlan"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/CarePlans": {
       "get": {
         "tags": [
@@ -1996,6 +2019,18 @@
         }
       }
     },
+    "/api/Payments/test-email": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Payments/{id}": {
       "delete": {
         "tags": [
@@ -2302,6 +2337,29 @@
         }
       },
       "delete": {
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Products/reactivate/{id}": {
+      "put": {
         "tags": [
           "Products"
         ],

@@ -29,6 +29,8 @@ public partial class ProjectSwpContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Cart> Cart { get; set; }
+
     public virtual DbSet<News> News { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -182,6 +184,24 @@ public partial class ProjectSwpContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Cart__UserId__4F47C5E3");
         });
+
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.HasKey(e => e.CartId).HasName("PK__Cart__51BCD7B761D93432");
+
+            entity.ToTable("Cart");
+
+            entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.ProductId)
+                .HasConstraintName("FK__Cart__ProductId__2A164134");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Carts)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__Cart__UserId__29221CFB");
+        });
+
 
         modelBuilder.Entity<Category>(entity =>
         {

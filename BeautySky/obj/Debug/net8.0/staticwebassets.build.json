@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "rHSgjU+ma2yBrNL4KRpWUFOr6XcW61AA0yqXohS5dFc=",
+  "Hash": "mBikaMv8fPEf6D0EyUCtR70eJr3ObMTZg1Osjnx9uKE=",
   "Source": "BeautySky",
   "BasePath": "_content/BeautySky",
   "Mode": "Default",
@@ -62,7 +62,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 14 Mar 2025 06:22:44 GMT"
+          "Value": "Fri, 28 Mar 2025 04:12:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -107,7 +107,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 14 Mar 2025 06:22:44 GMT"
+          "Value": "Fri, 28 Mar 2025 04:12:32 GMT"
         },
         {
           "Name": "Cache-Control",

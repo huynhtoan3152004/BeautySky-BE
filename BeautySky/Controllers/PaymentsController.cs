@@ -1,12 +1,10 @@
-﻿using BeautySky.Library;
-using BeautySky.Models;
+﻿using BeautySky.Models;
 using BeautySky.Models.Vnpay;
+using BeautySky.Service;
 using BeautySky.Services.Vnpay;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace BeautySky.Controllers
 {
@@ -18,17 +16,20 @@ namespace BeautySky.Controllers
         private readonly IVnPayService _vnPayService;
         private readonly ILogger<PaymentsController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         public PaymentsController(
             ProjectSwpContext context,
             IVnPayService vnPayService,
             ILogger<PaymentsController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailService emailService)
         {
             _context = context;
             _vnPayService = vnPayService;
             _logger = logger;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpPost("create-payment")]
@@ -47,16 +48,13 @@ namespace BeautySky.Controllers
                     return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ", errors });
                 }
 
-                // Kiểm tra đơn hàng
                 var order = await _context.Orders.FindAsync(request.OrderId);
                 if (order == null)
                 {
                     return BadRequest(new { success = false, message = "Không tìm thấy đơn hàng" });
                 }
 
-                // Tạo URL thanh toán bằng VnPayService
                 var paymentUrl = _vnPayService.CreatePaymentUrl(request, HttpContext);
-
                 return Ok(new { success = true, paymentUrl });
             }
             catch (Exception ex)
@@ -81,13 +79,10 @@ namespace BeautySky.Controllers
                     {
                         try
                         {
-                            // Sử dụng ProcessPaymentTransaction đã có
                             var result = await ProcessPaymentTransaction(orderIdInt);
-
                             if (result.Result is CreatedResult)
                             {
                                 _logger.LogInformation($"Payment for Order {orderIdInt} processed successfully via callback");
-                                // Chuyển hướng đến trang thành công với thông tin payment
                                 var payment = (result.Result as CreatedResult)?.Value as Payment;
                                 return Redirect($"http://localhost:5173/paymentsuccess?orderId={orderId}&paymentId={payment?.PaymentId}");
                             }
@@ -110,7 +105,6 @@ namespace BeautySky.Controllers
                     }
                 }
 
-                // Thanh toán thất bại hoặc bị hủy
                 return Redirect($"http://localhost:5173/paymentfailed?orderId={orderId}&message={message}");
             }
             catch (Exception ex)
@@ -119,7 +113,6 @@ namespace BeautySky.Controllers
                 return Redirect("http://localhost:5173/paymentfailed?message=" + WebUtility.UrlEncode("Có lỗi xảy ra trong quá trình xử lý thanh toán"));
             }
         }
-
 
         [HttpPost("ProcessAndConfirmPayment/{orderId}")]
         public async Task<ActionResult<Payment>> ProcessAndConfirmPayment(int orderId)
@@ -140,6 +133,21 @@ namespace BeautySky.Controllers
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
             }
         }
+
+        [HttpPost("test-email")]
+        public async Task<IActionResult> TestEmail()
+        {
+            try
+            {
+                await _emailService.SendEmailAsync("test@example.com", "Test Email", "<h1>Test thành công!</h1>");
+                return Ok("Email sent!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePayment(int id)
         {
@@ -153,9 +161,13 @@ namespace BeautySky.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
         private async Task<ActionResult<Payment>> ProcessPaymentTransaction(int orderId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
             if (order == null)
             {
                 _logger.LogWarning($"Order {orderId} not found.");
@@ -177,15 +189,27 @@ namespace BeautySky.Controllers
             var payment = await CreatePaymentRecord(order);
             await UpdateOrderStatus(order, payment);
 
+            if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
+            {
+                var emailBody = GenerateOrderEmailBody(order);
+                try
+                {
+                    await _emailService.SendEmailAsync(order.User.Email, "Đơn hàng của bạn đã được duyệt - BeautySky", emailBody);
+                    _logger.LogInformation($"Email sent successfully to {order.User.Email} for Order ID: {orderId}");
+                }
+                catch (Exception emailEx)
+                {
+                    _logger.LogError(emailEx, $"Error sending email for Order ID: {orderId}");
+                }
+            }
+
             _logger.LogInformation($"Payment {payment.PaymentId} processed successfully.");
             return Created($"api/Payments/{payment.PaymentId}", payment);
         }
+
         private async Task<Payment> CreatePaymentRecord(Order order)
         {
-            // Kiểm tra phương thức thanh toán của đơn hàng, xử lý an toàn
             int paymentTypeId;
-
-            // Kiểm tra null và gán giá trị mặc định
             if (order.Payment?.PaymentType?.PaymentTypeId == 1)
             {
                 paymentTypeId = 1; // VNPay
@@ -207,6 +231,7 @@ namespace BeautySky.Controllers
             await _context.SaveChangesAsync();
             return payment;
         }
+
         private async Task UpdateOrderStatus(Order order, Payment payment)
         {
             order.PaymentId = payment.PaymentId;
@@ -215,5 +240,35 @@ namespace BeautySky.Controllers
             await _context.SaveChangesAsync();
         }
 
+        private string GenerateOrderEmailBody(Order order)
+        {
+            // Xử lý null và format số
+            var formattedAmount = (order.FinalAmount?.ToString("0") ?? "0") + " VND";
+
+            var body = $@"
+    <h1>Đơn hàng của bạn đã được duyệt!</h1>
+    <p>Xin chào quý khách,</p>
+    <p>Cảm ơn bạn đã tin tưởng và đặt hàng tại <strong>BeautySky</strong>. Chúng tôi rất vui thông báo rằng đơn hàng của bạn đã được duyệt thành công.</p>
+    
+    <h3>Thông tin đơn hàng:</h3>
+    <p><strong>Mã đơn hàng:</strong> {order.OrderId}</p>
+    <p><strong>Tổng tiền:</strong> {formattedAmount}</p>
+
+    <p>Chúng tôi sẽ xử lý đơn hàng và giao đến bạn trong thời gian sớm nhất có thể. Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
+
+    <h3>Thông tin liên hệ:</h3>
+    <p><strong>Công ty TNHH Thương mại FPT</strong></p>
+    <p>Địa chỉ: Lô E2a-7, Đường D1, Khu Công Nghệ Cao, Thủ Đức, TP.HCM</p>
+    <p>Số điện thoại: 0937748123</p>
+    <p>Hotline: (028) 7300 5588</p>
+    <p>Email: <a>company.fbeauty@fpt.net.vn</a></p>
+
+    <p>Một lần nữa, BeautySky xin chân thành cảm ơn bạn đã ủng hộ chúng tôi.</p>
+    <p>Trân trọng,</p>
+    <p><strong>Đội ngũ BeautySky</strong></p>
+";
+
+            return body;
+        }
     }
 }

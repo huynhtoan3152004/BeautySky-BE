@@ -158,6 +158,9 @@ namespace BeautySky
                                     .AllowAnyHeader());
             });
 
+
+            //send email
+            builder.Services.AddTransient<IEmailService, EmailService>();
             var app = builder.Build();
 
             // Cấu hình pipeline HTTP
