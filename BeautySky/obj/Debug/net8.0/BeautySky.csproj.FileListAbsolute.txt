@@ -1533,8 +1533,10 @@ C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\bin\Debug\net8.0\VNPAY.NET.dl
 C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\obj\Debug\net8.0\BeautySky.RazorAssemblyInfo.cache
 C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\obj\Debug\net8.0\BeautySky.RazorAssemblyInfo.cs
 D:\SWP_BE\BeautySky\bin\Debug\net8.0\VNPAY.NET.dll
-D:\SWP_BE\BeautySky\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
-D:\SWP_BE\BeautySky\bin\Debug\net8.0\MailKit.dll
-D:\SWP_BE\BeautySky\bin\Debug\net8.0\MimeKit.dll
-D:\SWP_BE\BeautySky\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
-D:\SWP_BE\BeautySky\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\BeautySky.staticwebassets.runtime.json
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\VNPAY.NET.dll
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\MailKit.dll
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\MimeKit.dll
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll

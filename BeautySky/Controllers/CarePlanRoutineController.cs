@@ -268,75 +268,73 @@ public class CarePlanController : ControllerBase
     }
 
     [HttpDelete("DeleteUserCarePlan/{userId}")]
-    public async Task<IActionResult> DeleteUserCarePlan(int userId)
+    public async Task<IActionResult> DeleteUserCarePlan(int userId, int carePlanId)
     {
-        try
+        var userCarePlan = await _context.UserCarePlans
+            .Where(ucp => ucp.UserId == userId && ucp.CarePlanId == carePlanId)
+            .FirstOrDefaultAsync();
+
+        if (userCarePlan == null)
         {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null)
-            {
-                return NotFound("Không tìm thấy người dùng");
-            }
-
-            // Lấy tất cả lộ trình của user
-            var userCarePlans = await _context.UserCarePlans
-                .Where(ucp => ucp.UserId == userId)
-                .ToListAsync();
-
-            if (!userCarePlans.Any())
-            {
-                return NotFound("Không tìm thấy lộ trình nào của người dùng này");
-            }
-
-            // Xóa tất cả sản phẩm trong lộ trình
-            var carePlanProducts = await _context.CarePlanProducts
-                .Where(cpp => cpp.UserId == userId)
-                .ToListAsync();
-
-            _context.CarePlanProducts.RemoveRange(carePlanProducts);
-
-            // Xóa lộ trình
-            _context.UserCarePlans.RemoveRange(userCarePlans);
-
-            await _context.SaveChangesAsync();
-
-            return Ok("Đã xóa lộ trình thành công!");
+            return NotFound("User care plan not found.");
         }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Lỗi khi xóa lộ trình: {ex.Message}");
-        }
+
+        // Xóa tất cả sản phẩm thuộc lộ trình này của user
+        var carePlanProducts = _context.CarePlanProducts
+            .Where(cpp => cpp.UserId == userId && cpp.CarePlanId == carePlanId)
+            .ToList();
+
+        _context.CarePlanProducts.RemoveRange(carePlanProducts);
+        _context.UserCarePlans.Remove(userCarePlan);
+
+        await _context.SaveChangesAsync();
+
+        return Ok("Care plan deleted successfully.");
     }
 
-    private async Task SaveUserCarePlan(int userId, int carePlanId, int skinTypeId)
+
+
+    //private void DeleteOldUserCarePlan(int userId)
+    //{
+    //    var oldCarePlanProducts = _context.CarePlanProducts
+    //        .Where(cp => cp.UserId == userId)
+    //        .ToList();
+    //    _context.CarePlanProducts.RemoveRange(oldCarePlanProducts);
+
+    //    var oldUserCarePlan = _context.UserCarePlans
+    //        .Where(u => u.UserId == userId)
+    //        .ToList();
+    //    _context.UserCarePlans.RemoveRange(oldUserCarePlan);
+
+    //    _context.SaveChanges();
+    //}
+
+    private void SaveUserCarePlan(int userId, int carePlanId, int skinTypeId)
     {
-        var existingCarePlan = await _context.UserCarePlans
-            .FirstOrDefaultAsync(u => u.UserId == userId && u.CarePlan.SkinTypeId == skinTypeId);
+        var existingCarePlan = _context.UserCarePlans
+            .FirstOrDefault(u => u.UserId == userId && u.CarePlan.SkinTypeId == skinTypeId);
 
         if (existingCarePlan != null)
         {
-            // Cập nhật ngày tạo mới
-            existingCarePlan.DateCreate = DateTime.UtcNow; // Sử dụng UTC time
-
-            // Xóa các sản phẩm cũ trong lộ trình
-            var oldCarePlanProducts = await _context.CarePlanProducts
+            // Xóa các sản phẩm cũ trong lộ trình của loại da này
+            var oldCarePlanProducts = _context.CarePlanProducts
                 .Where(cp => cp.UserId == userId && cp.CarePlanId == existingCarePlan.CarePlanId)
-                .ToListAsync();
-
+                .ToList();
             _context.CarePlanProducts.RemoveRange(oldCarePlanProducts);
-            await _context.SaveChangesAsync();
+
+            _context.SaveChanges(); // Lưu thay đổi trước khi cập nhật
         }
         else
         {
-            // Tạo lộ trình mới với ngày tạo hiện tại
+            // Nếu chưa có lộ trình cũ cho loại da này, tạo mới
             var userCarePlan = new UserCarePlan
             {
                 UserId = userId,
                 CarePlanId = carePlanId,
-                DateCreate = DateTime.UtcNow // Sử dụng UTC time
+                DateCreate = DateTime.UtcNow
             };
             _context.UserCarePlans.Add(userCarePlan);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 
