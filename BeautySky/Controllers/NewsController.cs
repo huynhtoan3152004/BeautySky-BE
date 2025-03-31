@@ -29,7 +29,10 @@ namespace BeautySky.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<News>>> GetNews()
         {
-            return await _context.News.ToListAsync();
+            return await _context.News
+                .Where(n => n.IsActive == true)  // Thêm điều kiện lọc IsActive
+                .OrderByDescending(n => n.CreateDate)  // Sắp xếp theo ngày tạo mới nhất
+                .ToListAsync();
         }
 
         [HttpGet("{id}")]

@@ -30,7 +30,7 @@ namespace BeautySky.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Blog>>> GetBlogs()
         {
-            return await _context.Blogs.ToListAsync();
+            return await _context.Blogs.Where(b => b.IsActive).ToListAsync();
         }
 
         [HttpGet("{id}")]
