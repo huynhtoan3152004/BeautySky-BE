@@ -18,5 +18,8 @@ namespace BeautySky.DTO
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public bool? IsActive { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Point cannot be negative")]
+        public int Point { get; set; }
     }
 }

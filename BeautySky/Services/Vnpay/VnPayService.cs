@@ -73,7 +73,7 @@ namespace BeautySky.Services.Vnpay
         {
             var pay = new VnPayLibrary();
             var response = pay.GetFullResponseData(collections, _configuration["Vnpay:HashSecret"]);
-
+            var vnp_TxnRef = collections["vnp_TxnRef"];
             try
             {
                 if (!string.IsNullOrEmpty(response.OrderId))

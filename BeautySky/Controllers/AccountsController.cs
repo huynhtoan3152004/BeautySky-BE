@@ -56,6 +56,7 @@ namespace BeautySky.Controllers
             }
 
             user.RoleId = 1; // Customer
+            user.Point = 0;
             user.IsActive = true;
             user.DateCreate = DateTime.UtcNow;
             _context.Users.Add(user);
@@ -119,6 +120,7 @@ namespace BeautySky.Controllers
                 new Claim("role", roleName),
                 new Claim("phone", user.Phone),
                 new Claim("address", user.Address),
+                new Claim("point", user.Point.ToString()),
             };
 
             var token = new JwtSecurityToken(

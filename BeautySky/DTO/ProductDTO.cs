@@ -15,5 +15,7 @@
         public string? ImageDescription { get; set; }
         public bool? IsActive { get; set; }
 
+        public DateTime? Expire { get; set; }
+
     }
 }

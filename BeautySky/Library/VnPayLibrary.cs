@@ -7,7 +7,9 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using BeautySky.Controllers;
 using BeautySky.Models.Vnpay;
+using BeautySky.Services.Vnpay;
 using Microsoft.AspNetCore.Http;
 
 namespace BeautySky.Library
@@ -16,6 +18,7 @@ namespace BeautySky.Library
     {
         private readonly SortedList<string, string> _requestData = new SortedList<string, string>(new VnPayCompare());
         private readonly SortedList<string, string> _responseData = new SortedList<string, string>(new VnPayCompare());
+
 
         public PaymentResponseModel GetFullResponseData(IQueryCollection collection, string hashSecret)
         {
@@ -27,31 +30,65 @@ namespace BeautySky.Library
                     vnPay.AddResponseData(key, value);
                 }
             }
-            var orderId = Convert.ToInt64(vnPay.GetResponseData("vnp_TxnRef"));
-            var vnPayTranId = Convert.ToInt64(vnPay.GetResponseData("vnp_TransactionNo"));
-            var vnpResponseCode = vnPay.GetResponseData("vnp_ResponseCode");
-            var vnpSecureHash =
-                collection.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value; //hash của dữ liệu trả về
-            var orderInfo = vnPay.GetResponseData("vnp_OrderInfo");
-            var checkSignature =
-                vnPay.ValidateSignature(vnpSecureHash, hashSecret); //check Signature
-            if (!checkSignature)
-                return new PaymentResponseModel()
-                {
-                    Success = false
-                };
-            return new PaymentResponseModel()
+
+            var txnRef = vnPay.GetResponseData("vnp_TxnRef");
+
+            // Kiểm tra nếu txnRef là rỗng hoặc không hợp lệ
+            if (string.IsNullOrEmpty(txnRef))
             {
-                Success = true,
-                PaymentMethod = "VnPay",
-                OrderDescription = orderInfo,
-                OrderId = orderId.ToString(),
-                PaymentId = vnPayTranId.ToString(),
-                TransactionId = vnPayTranId.ToString(),
-                Token = vnpSecureHash,
-                VnPayResponseCode = vnpResponseCode
-            };
+
+                return new PaymentResponseModel() { Success = false }; // Trả về thất bại nếu không có vnp_TxnRef
+            }
+
+            // Tách txnRef nếu có dấu "_" và lấy phần trước dấu "_"
+            string[] txnRefParts = txnRef.Split('_');
+            if (txnRefParts.Length > 0 && long.TryParse(txnRefParts[0], out long orderId))
+            {
+                try
+                {
+                    // Lấy vnp_TransactionNo và kiểm tra nếu giá trị hợp lệ
+                    var vnPayTranIdStr = vnPay.GetResponseData("vnp_TransactionNo");
+
+                    // Kiểm tra nếu vnp_TransactionNo là chuỗi rỗng hoặc không hợp lệ
+                    if (string.IsNullOrEmpty(vnPayTranIdStr) || !long.TryParse(vnPayTranIdStr, out long vnPayTranId))
+                    {
+                        return new PaymentResponseModel() { Success = false }; // Trả về thất bại nếu không có vnp_TransactionNo hợp lệ
+                    }
+
+                    var vnpResponseCode = vnPay.GetResponseData("vnp_ResponseCode");
+                    var vnpSecureHash = collection.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value; //hash của dữ liệu trả về
+                    var orderInfo = vnPay.GetResponseData("vnp_OrderInfo");
+                    var checkSignature = vnPay.ValidateSignature(vnpSecureHash, hashSecret); //check Signature
+
+                    if (!checkSignature)
+                    {
+                        return new PaymentResponseModel() { Success = false }; // Trả về thất bại nếu chữ ký không hợp lệ
+                    }
+
+                    // Trả về kết quả thành công nếu tất cả đều hợp lệ
+                    return new PaymentResponseModel()
+                    {
+                        Success = true,
+                        PaymentMethod = "VnPay",
+                        OrderDescription = orderInfo,
+                        OrderId = orderId.ToString(),
+                        PaymentId = vnPayTranId.ToString(),
+                        TransactionId = vnPayTranId.ToString(),
+                        Token = vnpSecureHash,
+                        VnPayResponseCode = vnpResponseCode
+                    };
+                }
+                catch (FormatException ex)
+                {
+                    return new PaymentResponseModel() { Success = false };
+                }
+            }
+            else
+            {
+                return new PaymentResponseModel() { Success = false }; // Trả về thất bại nếu vnp_TxnRef không đúng định dạng
+            }
         }
+
 
         public string GetIpAddress(HttpContext context)
         {
@@ -176,10 +213,6 @@ namespace BeautySky.Library
 
             return data.ToString();
         }
-
-
-
-
     }
 
     public class VnPayCompare : IComparer<string>
@@ -193,7 +226,4 @@ namespace BeautySky.Library
             return vnpCompare.Compare(x, y, CompareOptions.Ordinal);
         }
     }
-
-
-
 }

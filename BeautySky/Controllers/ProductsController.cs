@@ -37,6 +37,15 @@ namespace BeautySky.Controllers
             string? skinTypeName = null)
         {
             IQueryable<Product> products = _context.Products.Include(p => p.ProductsImages).Include(p => p.Reviews).Include(p => p.Category).Include(p => p.SkinType);
+            var expiredProducts = await _context.Products.Where(p => p.Expire <= DateTime.Now && p.IsActive).ToListAsync();
+            if (expiredProducts.Any())
+            {
+                foreach (var product in expiredProducts)
+                {
+                    product.IsActive = false; // Set IsActive = false nếu sản phẩm đã hết hạn
+                }
+                await _context.SaveChangesAsync();
+            }
             if (id.HasValue)
             {
                 var product = await products.FirstOrDefaultAsync(p => p.ProductId == id);
@@ -60,6 +69,7 @@ namespace BeautySky.Controllers
                     product.SkinTypeId,
                     SkinTypeName = product.SkinType?.SkinTypeName,
                     Rating = rating,
+                    product.Expire,
                     productsImages = product.ProductsImages
                 });
 
@@ -112,8 +122,9 @@ namespace BeautySky.Controllers
                 p.SkinTypeId,
                 SkinTypeName = p.SkinType != null ? p.SkinType.SkinTypeName : null,
                 Rating = p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : (double?)null,
-                productsImages = p.ProductsImages,
-                p.IsActive
+                p.Expire,
+                p.IsActive,
+                productsImages = p.ProductsImages              
             }).ToListAsync();
 
             return Ok(productList);
@@ -124,7 +135,10 @@ namespace BeautySky.Controllers
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<Product>> PostProduct([FromForm] ProductDTO ProductDTO)
         {
-
+            if (ProductDTO.Expire <= DateTime.UtcNow)
+            {
+                return BadRequest("Do not expire the product before the current time.");
+            }
             var isDuplicate = await _context.Products.AnyAsync(p => p.ProductName == ProductDTO.ProductName);
             if (isDuplicate)
             {
@@ -160,6 +174,7 @@ namespace BeautySky.Controllers
                     Ingredient = ProductDTO.Ingredient,
                     CategoryId = ProductDTO.CategoryId,
                     SkinTypeId = ProductDTO.SkinTypeId,
+                    Expire = ProductDTO.Expire,
                     IsActive = ProductDTO.IsActive == true
 
                 };
@@ -207,7 +222,14 @@ namespace BeautySky.Controllers
             //{
             //    return BadRequest("Product name already exists.");
             //}
-
+            if (ProductDTO.Expire <= DateTime.UtcNow)
+            {
+                return BadRequest("Do not expire the product before the current time.");
+            }
+            else
+            {
+                ProductDTO.IsActive = true;
+            }
             if (!ModelState.IsValid || ProductDTO.Price < 0 || ProductDTO.Quantity < 0)
             {
                 if (ProductDTO.Price < 0)
@@ -236,6 +258,7 @@ namespace BeautySky.Controllers
                 product.Ingredient = ProductDTO.Ingredient ?? product.Ingredient;
                 product.CategoryId = ProductDTO.CategoryId ?? product.CategoryId;
                 product.SkinTypeId = ProductDTO.SkinTypeId ?? product.SkinTypeId;
+                product.Expire = ProductDTO.Expire ?? product.Expire;
                 product.IsActive = ProductDTO.IsActive ?? product.IsActive;
 
 

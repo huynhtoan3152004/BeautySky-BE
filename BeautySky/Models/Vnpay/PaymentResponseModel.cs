@@ -13,8 +13,5 @@ namespace BeautySky.Models.Vnpay
         public string Token { get; set; }
         public string VnPayResponseCode { get; set; }
         public decimal Amount { get; set; } // Thêm Amount nếu cần
-
-       
-
     }
 }
