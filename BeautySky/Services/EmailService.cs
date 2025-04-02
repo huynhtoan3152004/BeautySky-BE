@@ -4,7 +4,7 @@ using MimeKit;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace BeautySky.Service
+namespace BeautySky.Services
 {
     public class EmailService : IEmailService
     {
