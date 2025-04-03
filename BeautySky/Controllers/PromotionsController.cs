@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using BeautySky.Models;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BeautySky.Controllers
 {
@@ -78,7 +79,7 @@ namespace BeautySky.Controllers
             {
                 return BadRequest("DiscountPercentage can not be negative");
             }
-            if (promotion.StartDate < DateTime.UtcNow)
+            if (promotion.StartDate < DateTime.Now)
             {
                 return BadRequest("StartDate can not be before current date");
             }
@@ -103,7 +104,7 @@ namespace BeautySky.Controllers
             {
                 return BadRequest("Quantity can not be negative");
             }
-            if (updatedPromotion.StartDate < DateTime.UtcNow)
+            if (updatedPromotion.StartDate < DateTime.Now)
             {
                 return BadRequest("StartDate can not be before current date");
             }
@@ -117,15 +118,14 @@ namespace BeautySky.Controllers
             if (updatedPromotion.Quantity > 0)
                 existingPromotion.Quantity = updatedPromotion.Quantity;
 
-            if (updatedPromotion.StartDate >= DateTime.UtcNow)
+            if (updatedPromotion.StartDate >= DateTime.Now)
                 existingPromotion.StartDate = updatedPromotion.StartDate;
 
-            if (updatedPromotion.EndDate >= DateTime.UtcNow || updatedPromotion.EndDate < DateTime.UtcNow)
+            if (updatedPromotion.EndDate >= DateTime.Now || updatedPromotion.EndDate < DateTime.Now)
                  existingPromotion.EndDate = updatedPromotion.EndDate;
 
             if (updatedPromotion.IsActive != null)
                 existingPromotion.IsActive = updatedPromotion.IsActive;
-
 
             try
             {
@@ -157,6 +157,51 @@ namespace BeautySky.Controllers
         private bool PromotionExists(int id)
         {
             return _context.Promotions.Any(e => e.PromotionId == id);
+        }
+
+
+        [HttpGet("orders/myPromotions")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Promotion>>> GetMyPromotions()
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized("Invalid token or missing userId claim.");
+            }
+            
+            var userId = int.Parse(userIdClaim);
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Lấy danh sách các khuyến mãi còn hạn và thỏa mãn điều kiện điểm người dùng
+            var availablePromotions = await _context.Promotions
+                .Where(p => p.IsActive == true && p.EndDate >= DateTime.Now && p.StartDate <= DateTime.Now) // Khuyến mãi còn hạn
+                .Where(p => p.DiscountPercentage <= user.Point) // Khuyến mãi có tỷ lệ giảm <= số điểm người dùng có
+                .Select(p => new
+                {
+                    p.PromotionId,
+                    p.PromotionName,
+                    p.DiscountPercentage,
+                    p.StartDate,
+                    p.EndDate
+                })
+                .ToListAsync();
+
+            if (availablePromotions.Count == 0)
+            {
+                return NotFound("No promotions can be used");
+            }
+            var respone = new
+            {
+                UserPoint = user.Point,
+                Promotion = availablePromotions
+            };
+            return Ok(respone);
         }
     }
 }

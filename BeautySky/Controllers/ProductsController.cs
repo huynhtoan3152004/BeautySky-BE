@@ -135,7 +135,7 @@ namespace BeautySky.Controllers
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<Product>> PostProduct([FromForm] ProductDTO ProductDTO)
         {
-            if (ProductDTO.Expire <= DateTime.UtcNow)
+            if (ProductDTO.Expire <= DateTime.Now)
             {
                 return BadRequest("Do not expire the product before the current time.");
             }
@@ -222,7 +222,7 @@ namespace BeautySky.Controllers
             //{
             //    return BadRequest("Product name already exists.");
             //}
-            if (ProductDTO.Expire <= DateTime.UtcNow)
+            if (ProductDTO.Expire <= DateTime.Now)
             {
                 return BadRequest("Do not expire the product before the current time.");
             }

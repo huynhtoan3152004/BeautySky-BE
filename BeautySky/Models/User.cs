@@ -36,7 +36,8 @@ public partial class User
     public bool? IsActive { get; set; }
 
     [Range(0, int.MaxValue, ErrorMessage = "Point cannot be negative")]
-    public int Point { get; set; }
+    [DefaultValue(0)]
+    public int Point { get; set; } = 0;
     [JsonIgnore]
     public virtual ICollection<CarePlanProducts> CarePlanProducts { get; set; } = new List<CarePlanProducts>();
     [JsonIgnore]
