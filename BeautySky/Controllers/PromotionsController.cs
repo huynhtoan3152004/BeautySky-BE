@@ -23,7 +23,7 @@ namespace BeautySky.Controllers
             var promotions = await _context.Promotions.ToListAsync();
 
             bool changesMade = false; // Kiểm tra xem có thay đổi nào không
-            DateTime currentTime = DateTime.Now; // Lấy thời gian theo server
+            DateTime currentTime = DateTime.Now; // Lấy thời gian theo local
 
             foreach (var promo in promotions)
             {
@@ -160,7 +160,7 @@ namespace BeautySky.Controllers
         }
 
 
-        [HttpGet("orders/myPromotions")]
+        [HttpGet("myPromotions")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<Promotion>>> GetMyPromotions()
         {
@@ -180,8 +180,8 @@ namespace BeautySky.Controllers
 
             // Lấy danh sách các khuyến mãi còn hạn và thỏa mãn điều kiện điểm người dùng
             var availablePromotions = await _context.Promotions
-                .Where(p => p.IsActive == true && p.EndDate >= DateTime.Now && p.StartDate <= DateTime.Now) // Khuyến mãi còn hạn
-                .Where(p => p.DiscountPercentage <= user.Point) // Khuyến mãi có tỷ lệ giảm <= số điểm người dùng có
+                .Where(p => p.IsActive == true && p.EndDate >= DateTime.Now && p.StartDate <= DateTime.Now) // Khuyến mãi còn hạn và có IsActive là true
+                .Where(p => p.DiscountPercentage <= user.Point) // Khuyến mãi có tỷ lệ giảm = số điểm người dùng có
                 .Select(p => new
                 {
                     p.PromotionId,

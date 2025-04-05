@@ -72,7 +72,7 @@ namespace BeautySky.Controllers
                 // Xử lý phản hồi từ VnPay để nhận thông tin thanh toán
                 var response = _vnPayService.PaymentExecute(Request.Query);
                 _logger.LogInformation("VNPay Callback Params: {Params}", string.Join(", ", Request.Query.Select(kvp => $"{kvp.Key}={kvp.Value}")));
-                var orderId = response.OrderId?.ToString() ?? "";
+                var orderId = response.OrderId?.ToString() ?? ""; 
                 var message = response.OrderDescription ?? "";
 
                 // Kiểm tra nếu thanh toán thành công
@@ -88,7 +88,7 @@ namespace BeautySky.Controllers
                             if (result is OkObjectResult okResult) // Nếu xử lý thành công
                             {
                                 _logger.LogInformation($"Payment for Order {orderIdInt} processed successfully via callback");
-
+                                var order = await _context.Orders.Include(o => o.User).FirstOrDefaultAsync(o => o.OrderId == orderIdInt);
                                 var payment = ((dynamic)okResult.Value).paymentId;
                                 return Redirect($"http://localhost:5173/paymentsuccess?orderId={orderId}&paymentId={payment}");
                             }
