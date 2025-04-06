@@ -90,7 +90,7 @@ namespace BeautySky.Controllers
                                 _logger.LogInformation($"Payment for Order {orderIdInt} processed successfully via callback");
                                 var order = await _context.Orders.Include(o => o.User).FirstOrDefaultAsync(o => o.OrderId == orderIdInt);
                                 var payment = ((dynamic)okResult.Value).paymentId;
-                                return Redirect($"http://localhost:5173/paymentsuccess?orderId={orderId}&paymentId={payment}");
+                                return Ok(new { success = true, orderId = order.OrderId, paymentId = payment, message = "Thanh cong roi"});
                             }
                             else if (result is NotFoundResult) // Nếu không tìm thấy đơn hàng
                             {
