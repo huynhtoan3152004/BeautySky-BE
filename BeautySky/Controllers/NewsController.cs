@@ -29,10 +29,41 @@ namespace BeautySky.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<News>>> GetNews()
         {
-            return await _context.News
-                .Where(n => n.IsActive == true)  // Thêm điều kiện lọc IsActive
-                .OrderByDescending(n => n.CreateDate)  // Sắp xếp theo ngày tạo mới nhất
-                .ToListAsync();
+            var news = await _context.News.ToListAsync();
+
+            bool changesMade = false; // Kiểm tra xem có thay đổi nào không
+            DateTime currentTime = DateTime.Now; // Lấy thời gian theo local
+
+            foreach (var promo in news)
+            {
+                if (promo.StartDate > currentTime || promo.EndDate < currentTime)
+                {
+                    // Nếu chưa đến hạn hoặc đã hết hạn thì tắt IsActive
+                    if (promo.IsActive)
+                    {
+                        promo.IsActive = false;
+                        changesMade = true;
+                    }
+                }
+                else if (promo.StartDate <= currentTime && promo.EndDate >= currentTime)
+                {
+                    // Nếu khuyến mãi đang trong thời gian hiệu lực thì bật IsActive
+                    if (!promo.IsActive)
+                    {
+                        promo.IsActive = true;
+                        changesMade = true;
+                    }
+                }
+            }
+
+            if (changesMade)
+            {
+                await _context.SaveChangesAsync(); // Chỉ lưu nếu có thay đổi
+            }
+
+
+            // Trả về tất cả khuyến mãi đang hoạt động
+            return Ok(news);
         }
 
         [HttpGet("{id}")]
@@ -48,7 +79,14 @@ namespace BeautySky.Controllers
         public async Task<ActionResult<News>> PostNews([FromForm] NewsDTO newsDTO)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-
+            if (newsDTO.StartDate < DateTime.Now && newsDTO.EndDate < DateTime.Now)
+            {
+                return BadRequest("StartDate and EndDate can not be before current date");
+            }
+            if (newsDTO.EndDate < newsDTO.StartDate)
+            {
+                return BadRequest("EndDate cannot be before StartDate.");
+            }
             try
             {
                 var news = new News
@@ -95,7 +133,10 @@ namespace BeautySky.Controllers
         {
             var news = await _context.News.FindAsync(id);
             if (news == null) return NotFound("News not found.");
-
+            if (newsDTO.StartDate < DateTime.Now)
+            {
+                return BadRequest("StartDate can not be before current date");
+            }
             try
             {
                 news.Title = newsDTO.Title ?? news.Title;
