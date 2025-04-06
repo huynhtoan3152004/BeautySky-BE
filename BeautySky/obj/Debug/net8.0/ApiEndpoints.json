@@ -1182,6 +1182,22 @@
   },
   {
     "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "ConfirmDelivery",
+    "RelativePath": "api/Payments/confirm-delivery/{orderId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
     "Method": "ConfirmPaymentVnPay",
     "RelativePath": "api/Payments/confirm-payment/{orderId}",
     "HttpMethod": "POST",
