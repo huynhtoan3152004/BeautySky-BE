@@ -246,6 +246,89 @@ namespace BeautySky.Controllers
             }
         }
 
+        [HttpPost("confirm-delivery/{orderId}")]
+        public async Task<IActionResult> ConfirmDelivery(int orderId)
+        {
+            _logger.LogInformation($"Confirming delivery for Order ID: {orderId}");
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.Payment)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+                // Kiểm tra đơn hàng tồn tại
+                if (order == null)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+
+                // Kiểm tra trạng thái đơn hàng
+                if (order.Status != "Completed")
+                {
+                    return BadRequest(new { success = false, message = "Đơn hàng chưa được thanh toán hoặc không ở trạng thái phù hợp" });
+                }
+
+                // Cập nhật trạng thái đơn hàng
+                order.Status = "Delivered";
+                order.DeliveryDate = DateTime.Now;
+
+                // Cộng thêm điểm cho user khi giao hàng thành công
+                //if (order.User != null)
+                //{
+                //    var orderTotal = order.FinalAmount ?? 0;
+                //    var pointsEarned = (int)(orderTotal / 100000); // Cứ mỗi 100,000 VNĐ được 1 điểm
+                //    order.User.Point += pointsEarned;
+
+                //    _logger.LogInformation($"Added {pointsEarned} points to User ID: {order.User.UserId}");
+                //}
+
+                await _context.SaveChangesAsync();
+
+                // Gửi email thông báo giao hàng thành công
+                if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
+                {
+                    var emailBody = GenerateOrderEmailBody(order);
+                    try
+                    {
+                        await _emailService.SendEmailAsync(
+                            order.User.Email,
+                            "Đơn hàng đã giao thành công - BeautySky",
+                            emailBody
+                        );
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, $"Error sending delivery confirmation email for Order ID: {orderId}");
+                        // Không throw exception vì đây không phải lỗi nghiêm trọng
+                    }
+                }
+
+                await transaction.CommitAsync();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Đơn hàng đã được giao thành công",
+                    order = new
+                    {
+                        orderId = order.OrderId,
+                        status = order.Status,
+                        deliveryDate = order.DeliveryDate,
+                        pointsEarned = order.User?.Point
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, $"Error confirming delivery for Order ID {orderId}");
+                return StatusCode(500, new { success = false, message = "Có lỗi xảy ra khi xử lý giao hàng" });
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePayment(int id)
         {

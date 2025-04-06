@@ -1987,6 +1987,29 @@
         }
       }
     },
+    "/api/Payments/confirm-payment/{orderId}": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Payments/ProcessAndConfirmPayment/{orderId}": {
       "post": {
         "tags": [
@@ -2031,6 +2054,29 @@
       "post": {
         "tags": [
           "Payments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Payments/confirm-delivery/{orderId}": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -2182,6 +2228,10 @@
                   },
                   "IsActive": {
                     "type": "boolean"
+                  },
+                  "Expire": {
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               },
@@ -2214,6 +2264,9 @@
                   "style": "form"
                 },
                 "IsActive": {
+                  "style": "form"
+                },
+                "Expire": {
                   "style": "form"
                 }
               }
@@ -2300,6 +2353,10 @@
                   },
                   "IsActive": {
                     "type": "boolean"
+                  },
+                  "Expire": {
+                    "type": "string",
+                    "format": "date-time"
                   }
                 }
               },
@@ -2332,6 +2389,9 @@
                   "style": "form"
                 },
                 "IsActive": {
+                  "style": "form"
+                },
+                "Expire": {
                   "style": "form"
                 }
               }
@@ -2765,6 +2825,44 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Promotions/myPromotions": {
+      "get": {
+        "tags": [
+          "Promotions"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Promotion"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Promotion"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Promotion"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -4179,6 +4277,11 @@
           "status": {
             "type": "string",
             "nullable": true
+          },
+          "deliveryDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4295,6 +4398,11 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "expire": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -4334,6 +4442,7 @@
             "nullable": true
           },
           "discountPercentage": {
+            "minimum": 0,
             "type": "number",
             "format": "double"
           },
@@ -4347,9 +4456,14 @@
             "format": "date-time",
             "nullable": true
           },
+          "quantity": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
           "isActive": {
-            "type": "boolean",
-            "nullable": true
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -4549,6 +4663,13 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "point": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "default": 0
           }
         },
         "additionalProperties": false
@@ -4615,6 +4736,13 @@
           "isActive": {
             "type": "boolean",
             "nullable": true
+          },
+          "point": {
+            "maximum": 2147483647,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32",
+            "default": 0
           }
         },
         "additionalProperties": false

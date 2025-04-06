@@ -1182,6 +1182,38 @@
   },
   {
     "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "ConfirmDelivery",
+    "RelativePath": "api/Payments/confirm-delivery/{orderId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "ConfirmPaymentVnPay",
+    "RelativePath": "api/Payments/confirm-payment/{orderId}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
     "Method": "CreatePayment",
     "RelativePath": "api/Payments/create-payment",
     "HttpMethod": "POST",
@@ -1361,6 +1393,11 @@
         "Name": "IsActive",
         "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
+      },
+      {
+        "Name": "Expire",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": [
@@ -1436,6 +1473,11 @@
       {
         "Name": "IsActive",
         "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Expire",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
         "IsRequired": false
       }
     ],
@@ -1673,7 +1715,7 @@
         "IsRequired": true
       },
       {
-        "Name": "promotion",
+        "Name": "updatedPromotion",
         "Type": "BeautySky.Models.Promotion",
         "IsRequired": true
       }
@@ -1695,6 +1737,26 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.PromotionsController",
+    "Method": "GetMyPromotions",
+    "RelativePath": "api/Promotions/myPromotions",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BeautySky.Models.Promotion, BeautySky, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "BeautySky.Controllers.QuestionsController",
