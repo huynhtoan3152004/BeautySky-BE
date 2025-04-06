@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace BeautySky.DTO
 {
@@ -18,5 +19,9 @@ namespace BeautySky.DTO
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public bool? IsActive { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "Point cannot be negative")]
+        [DefaultValue(0)]
+        public int Point { get; set; }
     }
 }
