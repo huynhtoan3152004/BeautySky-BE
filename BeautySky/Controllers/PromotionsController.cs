@@ -83,6 +83,10 @@ namespace BeautySky.Controllers
             {
                 return BadRequest("StartDate can not be before current date");
             }
+            if (promotion.EndDate < promotion.StartDate)
+            {
+                return BadRequest("EndDate cannot be before StartDate");
+            }
             _context.Promotions.Add(promotion);
             await _context.SaveChangesAsync();
             return Ok("Add promotion success");

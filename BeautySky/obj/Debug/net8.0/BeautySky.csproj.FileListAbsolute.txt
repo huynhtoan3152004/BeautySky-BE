@@ -1540,3 +1540,8 @@ C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\MailKit.d
 C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\MimeKit.dll
 C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
 C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
+C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\bin\Debug\net8.0\MailKit.dll
+C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\bin\Debug\net8.0\MimeKit.dll
+C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\bin\Debug\net8.0\System.Security.Cryptography.Pkcs.dll
+C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Security.Cryptography.Pkcs.dll

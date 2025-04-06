@@ -63,7 +63,7 @@ namespace BeautySky.Controllers
 
 
             // Trả về tất cả khuyến mãi đang hoạt động
-            return Ok(news);
+            return Ok(news.Where(p => p.IsActive).ToList());
         }
 
         [HttpGet("{id}")]
@@ -79,9 +79,13 @@ namespace BeautySky.Controllers
         public async Task<ActionResult<News>> PostNews([FromForm] NewsDTO newsDTO)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            if (newsDTO.StartDate < DateTime.Now)
+            if (newsDTO.StartDate < DateTime.Now && newsDTO.EndDate < DateTime.Now)
             {
-                return BadRequest("StartDate can not be before current date");
+                return BadRequest("StartDate and EndDate can not be before current date");
+            }
+            if (newsDTO.EndDate < newsDTO.StartDate)
+            {
+                return BadRequest("EndDate cannot be before StartDate.");
             }
             try
             {

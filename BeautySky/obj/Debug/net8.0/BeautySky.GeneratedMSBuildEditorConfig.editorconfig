@@ -17,57 +17,55 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = BeautySky
 build_property.RootNamespace = BeautySky
-build_property.ProjectDir = C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky\
+build_property.ProjectDir = C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\ToanDev\WorkSpace\SWP\BeautySky-BE\BeautySky
+build_property.MSBuildProjectDirectory = C:\Users\danht\Source\Repos\BeautySky-BE\BeautySky
 build_property._RazorSourceGeneratorDebug = 
-build_property.EffectiveAnalysisLevelStyle = 8.0
-build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Orders/Create.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Orders/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Orders/Delete.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Orders/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXERlbGV0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Orders/Details.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Orders/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Orders/Edit.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Orders/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Orders/Index.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Orders/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcT3JkZXJzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Promotions/Create.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Promotions/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvbW90aW9uc1xDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Promotions/Delete.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Promotions/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvbW90aW9uc1xEZWxldGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Promotions/Details.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Promotions/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvbW90aW9uc1xEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Promotions/Edit.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Promotions/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvbW90aW9uc1xFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Promotions/Index.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Promotions/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvbW90aW9uc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/ToanDev/WorkSpace/SWP/BeautySky-BE/BeautySky/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/danht/Source/Repos/BeautySky-BE/BeautySky/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
