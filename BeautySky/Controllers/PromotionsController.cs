@@ -54,7 +54,7 @@ namespace BeautySky.Controllers
 
 
             // Trả về tất cả khuyến mãi đang hoạt động
-            return Ok(promotions.Where(p => p.IsActive).ToList());
+            return Ok(promotions);
         }
 
         [HttpGet("{id}")]
@@ -188,7 +188,8 @@ namespace BeautySky.Controllers
                     p.PromotionName,
                     p.DiscountPercentage,
                     p.StartDate,
-                    p.EndDate
+                    p.EndDate,
+                    p.Quantity
                 })
                 .ToListAsync();
 
