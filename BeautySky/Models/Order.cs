@@ -25,6 +25,10 @@ public partial class Order
     public string? CancelledReason { get; set; }
 
     public string Status { get; set; } = null!;
+    public DateTime? DeliveryDate { get; set; }
+    [JsonIgnore]
+
+    public DateTime? ShippingDate { get; set; }
     [JsonIgnore]
 
     public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();

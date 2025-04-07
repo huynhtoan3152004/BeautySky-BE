@@ -26,6 +26,7 @@ public partial class Product
     public int? SkinTypeId { get; set; }
 
     public bool IsActive { get; set; }
+    public DateTime? Expire { get; set; }
     [JsonIgnore]
     public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
     [JsonIgnore]

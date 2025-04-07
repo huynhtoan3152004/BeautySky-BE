@@ -249,6 +249,12 @@ public partial class ProjectSwpContext : DbContext
             entity.Property(e => e.CancelledDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.DeliveryDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ShippingDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
 
             entity.HasOne(d => d.Payment).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.PaymentId)
@@ -343,6 +349,7 @@ public partial class ProjectSwpContext : DbContext
             entity.Property(e => e.Price).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.ProductName).HasMaxLength(255);
             entity.Property(e => e.SkinTypeId).HasColumnName("SkinTypeID");
+            entity.Property(e => e.Expire).HasColumnType("datetime");
             entity.Property(e => e.IsActive).HasDefaultValue(true);
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
@@ -490,6 +497,7 @@ public partial class ProjectSwpContext : DbContext
             entity.Property(e => e.UserName)
                 .HasMaxLength(255)
                 .IsUnicode(false);
+            entity.Property(e => e.Point).HasColumnName("Point");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)

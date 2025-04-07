@@ -1,6 +1,6 @@
 ﻿using BeautySky.Models.Vnpay;
 
-namespace BeautySky.Service.Vnpay
+namespace BeautySky.Services.Vnpay
 {
     public interface IVnPayService
     {

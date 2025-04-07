@@ -1,7 +1,7 @@
 ﻿using Amazon;
 using Amazon.S3;
 using BeautySky.Models;
-using BeautySky.Service;
+using BeautySky.Services;
 using BeautySky.Services.Vnpay;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -96,6 +96,7 @@ namespace BeautySky
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    //ValidateLifetime = true, // set token thời hạn 3h theo AccountController và GoogleController 
                     ValidAudience = builder.Configuration["JWT:ValidAudience"],
                     ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))

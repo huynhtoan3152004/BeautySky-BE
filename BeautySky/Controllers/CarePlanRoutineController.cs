@@ -321,6 +321,8 @@ public class CarePlanController : ControllerBase
                 .Where(cp => cp.UserId == userId && cp.CarePlanId == existingCarePlan.CarePlanId)
                 .ToList();
             _context.CarePlanProducts.RemoveRange(oldCarePlanProducts);
+            existingCarePlan.DateCreate = DateTime.UtcNow;
+
             _context.SaveChanges(); // Lưu thay đổi trước khi cập nhật
         }
         else

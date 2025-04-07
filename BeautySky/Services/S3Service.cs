@@ -4,7 +4,7 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using System.Drawing;
 
-namespace BeautySky.Service
+namespace BeautySky.Services
 {
     public class S3Service
     {
