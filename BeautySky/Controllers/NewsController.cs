@@ -63,7 +63,7 @@ namespace BeautySky.Controllers
 
 
             // Trả về tất cả khuyến mãi đang hoạt động
-            return Ok(news);
+            return Ok(news.Where(p => p.IsActive).ToList());
         }
 
         [HttpGet("{id}")]

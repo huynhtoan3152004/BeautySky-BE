@@ -1,12 +1,8 @@
 {
   "Files": [
     {
-      "Id": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
+      "Id": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\wwwroot\\images\\2.png",
       "PackagePath": "staticwebassets\\images\\2.png"
-    },
-    {
-      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.BeautySky.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
-      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
     },
     {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.BeautySky.Microsoft.AspNetCore.StaticWebAssets.props",
