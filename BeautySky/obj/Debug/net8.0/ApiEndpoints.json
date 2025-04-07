@@ -1252,28 +1252,18 @@
   {
     "ContainingType": "BeautySky.Controllers.PaymentsController",
     "Method": "ProcessAndConfirmPayment",
-    "RelativePath": "api/Payments/ProcessAndConfirmPayment/{orderId}",
+    "RelativePath": "api/Payments/ProcessAndConfirmPayment",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
         "Name": "orderId",
-        "Type": "System.Int32",
-        "IsRequired": true
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "BeautySky.Models.Payment",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "BeautySky.Controllers.PaymentsController",
@@ -1284,6 +1274,28 @@
     "Order": 0,
     "Parameters": [],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "UpdateOrderStatusAfterDelay",
+    "RelativePath": "api/Payments/UpdateOrderStatusAfterDelay",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "BeautySky.Controllers.ProductsController",
