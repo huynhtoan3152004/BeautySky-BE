@@ -4,6 +4,7 @@ using BeautySky.Services;
 using BeautySky.Services.Vnpay;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Net;
 
 namespace BeautySky.Controllers
@@ -160,15 +161,6 @@ namespace BeautySky.Controllers
                     PaymentStatusId = 2, // Confirmed (Thanh toán đã xác nhận)
                     PaymentDate = DateTime.Now
                 };
-
-                // Lưu vào database
-                _context.Payments.Add(payment);
-                await _context.SaveChangesAsync();
-
-                // Cập nhật Order với PaymentId
-                order.PaymentId = payment.PaymentId;
-                order.Status = "Completed";
-
                 var user = await _context.Users.FindAsync(order.UserId);
                 if (user != null)
                 {
@@ -179,17 +171,32 @@ namespace BeautySky.Controllers
 
                 _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                // Lưu vào database
+                _context.Payments.Add(payment);
+                await _context.SaveChangesAsync();
 
-                // Commit transaction
-                await transaction.CommitAsync();
+                // Cập nhật Order với PaymentId
+                order.PaymentId = payment.PaymentId;
+                order.Status = "Completed";
+                order.OrderDate = DateTime.Now; // Lưu thời gian thanh toán
 
-                // Gửi email nếu có email
+                _context.Entry(order).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                // Gọi hàm để tự động chuyển trạng thái sang "Shipping" sau 30 giây
+                _ = UpdateOrderStatusAfterDelay(orderId);  // Sử dụng `_ =` để không chặn luồng chính
+
+                // Gửi email xác nhận thanh toán
                 if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
                 {
                     var emailBody = GenerateOrderEmailBody(order);
                     try
                     {
-                        await _emailService.SendEmailAsync(order.User.Email, "Thanh toán thành công - BeautySky", emailBody);
+                        await _emailService.SendEmailAsync(
+                            order.User.Email,
+                            "Thanh toán thành công - BeautySky",
+                            emailBody
+                        );
                         _logger.LogInformation($"Email đã gửi thành công đến {order.User.Email} cho đơn hàng ID: {orderId}");
                     }
                     catch (Exception ex)
@@ -197,12 +204,16 @@ namespace BeautySky.Controllers
                         _logger.LogError(ex, $"Lỗi khi gửi email cho đơn hàng ID: {orderId}");
                     }
                 }
-                else
-                {
-                    _logger.LogWarning($"User của đơn hàng ID {orderId} không có email, không thể gửi thông báo.");
-                }
 
-                return Ok(new { success = true, message = "Thanh toán qua VnPay đã được xác nhận và đơn hàng đã được duyệt", paymentId = payment.PaymentId });
+                // Commit transaction chính
+                await transaction.CommitAsync();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Thanh toán qua VnPay đã được xác nhận và đơn hàng đã được duyệt. Đơn hàng sẽ tự động chuyển sang trạng thái giao hàng sau 30 giây.",
+                    paymentId = payment.PaymentId
+                });
             }
             catch (Exception ex)
             {
@@ -212,22 +223,111 @@ namespace BeautySky.Controllers
             }
         }
 
-        [HttpPost("ProcessAndConfirmPayment/{orderId}")]
-        public async Task<ActionResult<Payment>> ProcessAndConfirmPayment(int orderId)
+
+        [HttpPost("UpdateOrderStatusAfterDelay")]
+        public async Task UpdateOrderStatusAfterDelay(int orderId)
         {
-            _logger.LogInformation($"Processing payment for Order ID: {orderId}");
+            try
+            {
+                // Lấy lại đơn hàng từ database
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+                if (order == null)
+                {
+                    _logger.LogWarning($"Order {orderId} not found.");
+                    return;
+                }
+
+                // Kiểm tra nếu trạng thái đơn hàng là "Completed"
+                if (order.Status == "Completed")
+                {
+                    // Chờ 30 giây (hoặc một khoảng thời gian khác)
+                    await Task.Delay(TimeSpan.FromSeconds(30));
+
+                    // Cập nhật trạng thái của đơn hàng sang "Shipping"
+                    order.Status = "Shipping";
+                    order.ShippingDate = DateTime.Now;
+
+                    // Lưu vào database
+                    _context.Orders.Update(order);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"Order {orderId} status updated to Shipping after 30 seconds.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating order {orderId} status to Shipping.");
+            }
+        }
+
+
+        [HttpPost("ProcessAndConfirmPayment")]
+        public async Task<ActionResult> ProcessAndConfirmPayment([FromQuery] int? orderId = null)
+        {
+            _logger.LogInformation(orderId.HasValue
+                ? $"Processing payment for Order ID: {orderId}"
+                : "Processing payment for all pending orders");
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var result = await ProcessPaymentTransaction(orderId);
+                // Lấy đơn hàng cần xử lý
+                var ordersQuery = _context.Orders
+                    .Include(o => o.User)
+                    .Where(o => o.Status == "Pending" && o.PaymentId == null);
+
+                if (orderId.HasValue)
+                {
+                    ordersQuery = ordersQuery.Where(o => o.OrderId == orderId.Value);
+                }
+
+                var orders = await ordersQuery.ToListAsync();
+
+                if (orders.Count == 0)
+                {
+                    return BadRequest(orderId.HasValue
+                        ? "Order not found or already processed."
+                        : "No valid pending orders to process.");
+                }
+
+                // Duyệt từng đơn hàng và xử lý
+                foreach (var order in orders)
+                {
+                    var payment = new Payment
+                    {
+                        UserId = order.UserId,
+                        PaymentTypeId = 1, // Giả sử là VnPay
+                        PaymentStatusId = 2, // Confirmed
+                        PaymentDate = DateTime.Now
+                    };
+
+                    _context.Payments.Add(payment);
+                    await _context.SaveChangesAsync();
+
+                    order.PaymentId = payment.PaymentId;
+                    order.Status = "Completed";
+
+                    if (order.User != null)
+                    {
+                        order.User.Point += 1;
+                        _context.Users.Update(order.User);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return result;
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"{orders.Count} order(s) have been processed and points have been added."
+                });
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, $"Error processing payment for Order ID {orderId}");
+                _logger.LogError(ex, "Error processing payment");
                 return StatusCode(500, $"Internal Server Error: {ex.Message}");
             }
         }
@@ -245,6 +345,82 @@ namespace BeautySky.Controllers
                 return BadRequest($"Error: {ex.Message}");
             }
         }
+
+        //[HttpPost("start-shipping/{orderId}")]
+        //public async Task<IActionResult> StartShipping(int orderId)
+        //{
+        //    _logger.LogInformation($"Starting shipping process for Order ID: {orderId}");
+
+        //    using var transaction = await _context.Database.BeginTransactionAsync();
+        //    try
+        //    {
+        //        var order = await _context.Orders
+        //            .Include(o => o.User)
+        //            .Include(o => o.Payment)
+        //            .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+        //        // Kiểm tra đơn hàng tồn tại
+        //        if (order == null)
+        //        {
+        //            return NotFound(new { success = false, message = "Không tìm thấy đơn hàng" });
+        //        }
+
+        //        // Kiểm tra trạng thái đơn hàng
+        //        if (order.Status != "Completed")
+        //        {
+        //            return BadRequest(new
+        //            {
+        //                success = false,
+        //                message = "Đơn hàng chưa được thanh toán hoặc không ở trạng thái phù hợp để giao hàng"
+        //            });
+        //        }
+
+        //        // Cập nhật trạng thái đơn hàng thành Shipping
+        //        order.Status = "Shipping";
+        //        order.ShippingDate = DateTime.Now;
+
+        //        await _context.SaveChangesAsync();
+
+        //        // Gửi email thông báo đang giao hàng
+        //        if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
+        //        {
+        //            var emailBody = GenerateShippingEmailBody(order);
+        //            try
+        //            {
+        //                await _emailService.SendEmailAsync(
+        //                    order.User.Email,
+        //                    "Đơn hàng đang được giao - BeautySky",
+        //                    emailBody
+        //                );
+        //            }
+        //            catch (Exception emailEx)
+        //            {
+        //                _logger.LogError(emailEx, $"Error sending shipping notification email for Order ID: {orderId}");
+        //            }
+        //        }
+
+        //        await transaction.CommitAsync();
+
+        //        return Ok(new
+        //        {
+        //            success = true,
+        //            message = "Đơn hàng đã chuyển sang trạng thái đang giao hàng",
+        //            order = new
+        //            {
+        //                orderId = order.OrderId,
+        //                status = order.Status,
+        //                shippingDate = order.ShippingDate
+        //            }
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        await transaction.RollbackAsync();
+        //        _logger.LogError(ex, $"Error starting shipping for Order ID {orderId}");
+        //        return StatusCode(500, new { success = false, message = "Có lỗi xảy ra khi xử lý giao hàng" });
+        //    }
+        //}
+
 
         [HttpPost("confirm-delivery/{orderId}")]
         public async Task<IActionResult> ConfirmDelivery(int orderId)
@@ -266,7 +442,7 @@ namespace BeautySky.Controllers
                 }
 
                 // Kiểm tra trạng thái đơn hàng
-                if (order.Status != "Completed")
+                if (order.Status != "Shipping")
                 {
                     return BadRequest(new { success = false, message = "Đơn hàng chưa được thanh toán hoặc không ở trạng thái phù hợp" });
                 }
@@ -425,6 +601,35 @@ namespace BeautySky.Controllers
             order.Status = "Completed";
             _context.Entry(order).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+        }
+
+        private string GenerateShippingEmailBody(Order order)
+        {
+            var formattedAmount = (order.FinalAmount?.ToString("0") ?? "0") + " VND";
+
+            var body = $@"
+    <h1>Đơn hàng của bạn đang được giao!</h1>
+    <p>Xin chào quý khách,</p>
+    <p>Đơn hàng của bạn đã được chuyển cho đơn vị vận chuyển và đang trên đường giao đến bạn.</p>
+    
+    <h3>Thông tin đơn hàng:</h3>
+    <p><strong>Mã đơn hàng:</strong> {order.OrderId}</p>
+    <p><strong>Tổng tiền:</strong> {formattedAmount}</p>
+    <p><strong>Ngày bắt đầu giao:</strong> {order.ShippingDate:dd/MM/yyyy HH:mm}</p>
+
+    <p>Đơn hàng sẽ được giao đến bạn trong thời gian sớm nhất. Vui lòng chuẩn bị số tiền chính xác nếu bạn chọn thanh toán khi nhận hàng (COD).</p>
+
+    <h3>Thông tin liên hệ hỗ trợ:</h3>
+    <p><strong>Công ty TNHH Thương mại FPT</strong></p>
+    <p>Hotline: (028) 7300 5588</p>
+    <p>Email: support@beautysky.com</p>
+
+    <p>Cảm ơn bạn đã tin tưởng và ủng hộ BeautySky!</p>
+    <p>Trân trọng,</p>
+    <p><strong>Đội ngũ BeautySky</strong></p>
+";
+
+            return body;
         }
 
         private string GenerateOrderEmailBody(Order order)
