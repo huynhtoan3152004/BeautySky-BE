@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\BeautySky.csproj": {}
+    "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\BeautySky.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\BeautySky.csproj": {
+    "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\BeautySky.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\BeautySky.csproj",
+        "projectUniqueName": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\BeautySky.csproj",
         "projectName": "BeautySky",
-        "projectPath": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\BeautySky.csproj",
-        "packagesPath": "C:\\Users\\ToanDev\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\obj\\",
+        "projectPath": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\BeautySky.csproj",
+        "packagesPath": "C:\\Users\\danht\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\ToanDev\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\danht\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,6 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,8 +40,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.100"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -53,10 +49,6 @@
             "AWSSDK.S3": {
               "target": "Package",
               "version": "[3.7.415.2, )"
-            },
-            "MailKit": {
-              "target": "Package",
-              "version": "[4.11.0, )"
             },
             "Microsoft.AspNetCore.Authentication.Google": {
               "target": "Package",
@@ -112,7 +104,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
