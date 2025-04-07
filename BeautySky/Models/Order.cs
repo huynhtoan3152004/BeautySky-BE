@@ -28,6 +28,9 @@ public partial class Order
     public DateTime? DeliveryDate { get; set; }
     [JsonIgnore]
 
+    public DateTime? ShippingDate { get; set; }
+    [JsonIgnore]
+
     public virtual ICollection<OrderProduct> OrderProducts { get; set; } = new List<OrderProduct>();
     [JsonIgnore]
 
