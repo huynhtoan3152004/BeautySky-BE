@@ -4,7 +4,6 @@ using BeautySky.Services;
 using BeautySky.Services.Vnpay;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Net;
 
 namespace BeautySky.Controllers
@@ -19,18 +18,22 @@ namespace BeautySky.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
 
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
         public PaymentsController(
             ProjectSwpContext context,
             IVnPayService vnPayService,
             ILogger<PaymentsController> logger,
             IConfiguration configuration,
-            IEmailService emailService)
+            IEmailService emailService,
+            IServiceScopeFactory serviceScopeFactory)
         {
             _context = context;
             _vnPayService = vnPayService;
             _logger = logger;
             _configuration = configuration;
             _emailService = emailService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         [HttpPost("create-payment")]
@@ -73,7 +76,7 @@ namespace BeautySky.Controllers
                 // Xử lý phản hồi từ VnPay để nhận thông tin thanh toán
                 var response = _vnPayService.PaymentExecute(Request.Query);
                 _logger.LogInformation("VNPay Callback Params: {Params}", string.Join(", ", Request.Query.Select(kvp => $"{kvp.Key}={kvp.Value}")));
-                var orderId = response.OrderId?.ToString() ?? ""; 
+                var orderId = response.OrderId?.ToString() ?? "";
                 var message = response.OrderDescription ?? "";
 
                 // Kiểm tra nếu thanh toán thành công
@@ -91,7 +94,7 @@ namespace BeautySky.Controllers
                                 _logger.LogInformation($"Payment for Order {orderIdInt} processed successfully via callback");
                                 var order = await _context.Orders.Include(o => o.User).FirstOrDefaultAsync(o => o.OrderId == orderIdInt);
                                 var payment = ((dynamic)okResult.Value).paymentId;
-                                return Ok(new { success = true, orderId = order.OrderId, paymentId = payment, message = "Thanh cong roi"});
+                                return Ok(new { success = true, orderId = order.OrderId, paymentId = payment, message = "Thanh cong roi" });
                             }
                             else if (result is NotFoundResult) // Nếu không tìm thấy đơn hàng
                             {
@@ -229,35 +232,62 @@ namespace BeautySky.Controllers
         {
             try
             {
-                // Lấy lại đơn hàng từ database
-                var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-
-                if (order == null)
+                // Tạo một task riêng biệt để xử lý delay và cập nhật trạng thái
+                // Task này sẽ chạy độc lập với request hiện tại
+                _ = Task.Run(async () =>
                 {
-                    _logger.LogWarning($"Order {orderId} not found.");
-                    return;
-                }
+                    try
+                    {
+                        // Chờ 5 giây trước khi thực hiện cập nhật
+                        await Task.Delay(TimeSpan.FromSeconds(5));
 
-                // Kiểm tra nếu trạng thái đơn hàng là "Completed"
-                if (order.Status == "Completed")
-                {
-                    // Chờ 30 giây (hoặc một khoảng thời gian khác)
-                    await Task.Delay(TimeSpan.FromSeconds(30));
+                        // Tạo scope mới để truy cập database sau khi delay
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            var dbContext = scope.ServiceProvider.GetRequiredService<ProjectSwpContext>();
+                            var logger = scope.ServiceProvider.GetRequiredService<ILogger<PaymentsController>>();
 
-                    // Cập nhật trạng thái của đơn hàng sang "Shipping"
-                    order.Status = "Shipping";
-                    order.ShippingDate = DateTime.Now;
+                            // Lấy lại đơn hàng từ database
+                            var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-                    // Lưu vào database
-                    _context.Orders.Update(order);
-                    await _context.SaveChangesAsync();
+                            if (order == null)
+                            {
+                                logger.LogWarning($"Order {orderId} not found when attempting to update status after delay.");
+                                return;
+                            }
 
-                    _logger.LogInformation($"Order {orderId} status updated to Shipping after 30 seconds.");
-                }
+                            // Kiểm tra nếu trạng thái đơn hàng là "Completed"
+                            if (order.Status == "Completed")
+                            {
+                                // Cập nhật trạng thái của đơn hàng sang "Shipping"
+                                order.Status = "Shipping";
+                                order.ShippingDate = DateTime.Now;
+
+                                // Lưu vào database
+                                dbContext.Orders.Update(order);
+                                await dbContext.SaveChangesAsync();
+
+                                logger.LogInformation($"Order {orderId} status updated to Shipping after 30 seconds.");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Sử dụng logger từ scope mới
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            var logger = scope.ServiceProvider.GetRequiredService<ILogger<PaymentsController>>();
+                            logger.LogError(ex, $"Error updating order {orderId} status to Shipping after delay.");
+                        }
+                    }
+                });
+
+                // Phương thức này trả về ngay lập tức, không đợi task hoàn thành
+                return;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating order {orderId} status to Shipping.");
+                _logger.LogError(ex, $"Error initiating delayed update for order {orderId}.");
             }
         }
 
