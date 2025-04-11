@@ -94,6 +94,8 @@ namespace BeautySky.Controllers
             var orders = await _context.Orders
                 .Include(o => o.OrderProducts)
                 .Include(o => o.User)
+                .Include(o => o.Payment)
+                    .ThenInclude(p => p.PaymentType) // Thêm dòng này để lấy thông tin PaymentType
                 .Select(o => new
                 {
                     o.OrderId,
@@ -101,10 +103,21 @@ namespace BeautySky.Controllers
                     o.TotalAmount,
                     o.DiscountAmount,
                     o.FinalAmount,
-                    o.Status,        // Thêm status
+                    o.Status,
                     o.PaymentId,
                     o.CancelledDate,
                     o.CancelledReason,
+                    Payment = o.Payment != null ? new
+                    {
+                        o.Payment.PaymentId,
+                        o.Payment.PaymentTypeId,
+                        o.Payment.PaymentStatus,
+                        PaymentType = new
+                        {
+                            o.Payment.PaymentType.PaymentTypeId,
+                            o.Payment.PaymentType.PaymentTypeName
+                        }
+                    } : null,
                     User = new
                     {
                         o.User.UserId,

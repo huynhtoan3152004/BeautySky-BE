@@ -2010,7 +2010,41 @@
         }
       }
     },
-    "/api/Payments/ProcessAndConfirmPayment/{orderId}": {
+    "/api/Payments/ProcessAndConfirmPayment": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Payments/test-email": {
+      "post": {
+        "tags": [
+          "Payments"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Payments/start-shipping/{orderId}": {
       "post": {
         "tags": [
           "Payments"
@@ -2025,35 +2059,6 @@
               "format": "int32"
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/Payment"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Payment"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Payment"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Payments/test-email": {
-      "post": {
-        "tags": [
-          "Payments"
         ],
         "responses": {
           "200": {
@@ -4296,36 +4301,6 @@
           "quantity": {
             "type": "integer",
             "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "Payment": {
-        "type": "object",
-        "properties": {
-          "paymentId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "paymentTypeId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "paymentStatusId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "paymentDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
           }
         },
         "additionalProperties": false

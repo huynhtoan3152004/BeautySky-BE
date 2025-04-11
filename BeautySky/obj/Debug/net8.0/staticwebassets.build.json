@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "UKfakhu55BH94Ekoc4nj0CzT5KtaaScy5qRjp7k4Xrk=",
+  "Hash": "mBikaMv8fPEf6D0EyUCtR70eJr3ObMTZg1Osjnx9uKE=",
   "Source": "BeautySky",
   "BasePath": "_content/BeautySky",
   "Mode": "Default",
@@ -10,30 +10,116 @@
     {
       "Name": "BeautySky\\wwwroot",
       "Source": "BeautySky",
-      "ContentRoot": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\wwwroot\\",
+      "ContentRoot": "D:\\SWP_BE\\BeautySky\\wwwroot\\",
       "BasePath": "_content/BeautySky",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\wwwroot\\images\\2.png",
+      "Identity": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
       "SourceId": "BeautySky",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\danht\\Source\\Repos\\BeautySky-BE\\BeautySky\\wwwroot\\",
+      "ContentRoot": "D:\\SWP_BE\\BeautySky\\wwwroot\\",
       "BasePath": "_content/BeautySky",
-      "RelativePath": "images/2.png",
+      "RelativePath": "images/2#[.{fingerprint}]?.png",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
-      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeBehavior": "",
       "AssetMergeSource": "",
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
+      "Fingerprint": "6mkomelrmr",
+      "Integrity": "oqMm4E3FKZ21x7Tc1+HfB9+ebQVBPA5LxEY8xBF3q10=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\images\\2.png"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "images/2.6mkomelrmr.png",
+      "AssetFile": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1326135"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"oqMm4E3FKZ21x7Tc1+HfB9+ebQVBPA5LxEY8xBF3q10=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 28 Mar 2025 04:12:32 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6mkomelrmr"
+        },
+        {
+          "Name": "label",
+          "Value": "images/2.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-oqMm4E3FKZ21x7Tc1+HfB9+ebQVBPA5LxEY8xBF3q10="
+        }
+      ]
+    },
+    {
+      "Route": "images/2.png",
+      "AssetFile": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1326135"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"oqMm4E3FKZ21x7Tc1+HfB9+ebQVBPA5LxEY8xBF3q10=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 28 Mar 2025 04:12:32 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-oqMm4E3FKZ21x7Tc1+HfB9+ebQVBPA5LxEY8xBF3q10="
+        }
+      ]
     }
   ]
 }

@@ -1267,18 +1267,8 @@
   },
   {
     "ContainingType": "BeautySky.Controllers.PaymentsController",
-    "Method": "TestEmail",
-    "RelativePath": "api/Payments/test-email",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "BeautySky.Controllers.PaymentsController",
-    "Method": "UpdateOrderStatusAfterDelay",
-    "RelativePath": "api/Payments/UpdateOrderStatusAfterDelay",
+    "Method": "StartShipping",
+    "RelativePath": "api/Payments/start-shipping/{orderId}",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -1286,16 +1276,20 @@
       {
         "Name": "orderId",
         "Type": "System.Int32",
-        "IsRequired": false
+        "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Void",
-        "MediaTypes": [],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "TestEmail",
+    "RelativePath": "api/Payments/test-email",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "BeautySky.Controllers.ProductsController",
