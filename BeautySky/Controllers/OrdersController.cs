@@ -232,7 +232,15 @@ namespace BeautySky.Controllers
                 {
                     return BadRequest($"Sản phẩm {product.ProductName} không đủ số lượng (còn {product.Quantity} cái)");
                 }
+                if (product.Expire < DateTime.Now)
+                {
+                    return BadRequest($"Sản phẩm đã hết hạn {product.Expire}");
+                }
 
+                if (product.IsActive == false)
+                {
+                    return BadRequest($"Sản phẩm đang không hoạt động {product.IsActive}");
+                }
                 var itemTotal = product.Price * item.Quantity;
                 totalAmount += itemTotal;
 
