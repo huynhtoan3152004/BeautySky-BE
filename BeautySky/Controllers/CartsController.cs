@@ -157,6 +157,15 @@ public class CartsController : ControllerBase
             return BadRequest($"Số lượng sản phẩm vượt quá số lượng trong kho. Số lượng còn lại là {product.Quantity}.");
         }
 
+        if (product.Expire < DateTime.Now)
+        {
+            return BadRequest($"Sản phẩm đã hết hạn {product.Expire}");
+        }
+
+        if (product.IsActive == false)
+        {
+            return BadRequest($"Sản phẩm đang không hoạt động {product.IsActive}");
+        }
         cart.TotalPrice = product.Price * cart.Quantity;
         int? userId = GetUserId();
 
@@ -248,6 +257,15 @@ public class CartsController : ControllerBase
             return BadRequest($"Số lượng sản phẩm vượt quá số lượng trong kho. Số lượng còn lại là {product.Quantity}.");
         }
 
+        if (product.Expire < DateTime.Now)
+        {
+            return BadRequest($"Sản phẩm đã hết hạn {product.Expire}");
+        }
+
+        if (product.IsActive == false)
+        {
+            return BadRequest($"Sản phẩm đang không hoạt động {product.IsActive}");
+        }
         cart.TotalPrice = product.Price * cart.Quantity;
         int? userId = GetUserId();
 

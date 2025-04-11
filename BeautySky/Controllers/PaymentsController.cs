@@ -297,7 +297,7 @@ namespace BeautySky.Controllers
                     var payment = new Payment
                     {
                         UserId = order.UserId,
-                        PaymentTypeId = 1, // Giả sử là VnPay
+                        PaymentTypeId = 2,
                         PaymentStatusId = 2, // Confirmed
                         PaymentDate = DateTime.Now
                     };

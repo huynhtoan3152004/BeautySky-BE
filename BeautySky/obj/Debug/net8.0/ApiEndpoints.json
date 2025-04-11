@@ -1276,6 +1276,28 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "BeautySky.Controllers.PaymentsController",
+    "Method": "UpdateOrderStatusAfterDelay",
+    "RelativePath": "api/Payments/UpdateOrderStatusAfterDelay",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderId",
+        "Type": "System.Int32",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "BeautySky.Controllers.ProductsController",
     "Method": "GetProducts",
     "RelativePath": "api/Products",
