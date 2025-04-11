@@ -52,6 +52,8 @@ namespace BeautySky.Controllers
             {
                 return NotFound(new { message = "User not found." });
             }
+            if (updatedUser.Point < 0)
+                return BadRequest("Point can not negative");
 
             if (!string.IsNullOrEmpty(updatedUser.UserName))
                 existingUser.UserName = updatedUser.UserName;
@@ -90,7 +92,8 @@ namespace BeautySky.Controllers
 
             if (updatedUser.IsActive.HasValue)
                 existingUser.IsActive = updatedUser.IsActive;
-
+            if (updatedUser.Point >0)
+                existingUser.Point = updatedUser.Point;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Update Successful", user = existingUser });
         }

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-namespace BeautySky.Service
+namespace BeautySky.Services
 
 {
     public interface IEmailService

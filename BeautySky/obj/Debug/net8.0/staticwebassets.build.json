@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "6drkUz19IRLJi6yYjwgfNqHZcMgkNILAeKVkceZ/W5k=",
+  "Hash": "mBikaMv8fPEf6D0EyUCtR70eJr3ObMTZg1Osjnx9uKE=",
   "Source": "BeautySky",
   "BasePath": "_content/BeautySky",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "BeautySky\\wwwroot",
       "Source": "BeautySky",
-      "ContentRoot": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\wwwroot\\",
+      "ContentRoot": "D:\\SWP_BE\\BeautySky\\wwwroot\\",
       "BasePath": "_content/BeautySky",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\wwwroot\\images\\2.png",
+      "Identity": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
       "SourceId": "BeautySky",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\wwwroot\\",
+      "ContentRoot": "D:\\SWP_BE\\BeautySky\\wwwroot\\",
       "BasePath": "_content/BeautySky",
       "RelativePath": "images/2#[.{fingerprint}]?.png",
       "AssetKind": "All",
@@ -41,7 +41,7 @@
   "Endpoints": [
     {
       "Route": "images/2.6mkomelrmr.png",
-      "AssetFile": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\wwwroot\\images\\2.png",
+      "AssetFile": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -62,7 +62,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 17 Mar 2025 16:09:02 GMT"
+          "Value": "Fri, 28 Mar 2025 04:12:32 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -86,7 +86,7 @@
     },
     {
       "Route": "images/2.png",
-      "AssetFile": "C:\\Users\\ToanDev\\WorkSpace\\SWP\\BeautySky-BE\\BeautySky\\wwwroot\\images\\2.png",
+      "AssetFile": "D:\\SWP_BE\\BeautySky\\wwwroot\\images\\2.png",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -107,7 +107,7 @@
         },
         {
           "Name": "Last-Modified",
-          "Value": "Mon, 17 Mar 2025 16:09:02 GMT"
+          "Value": "Fri, 28 Mar 2025 04:12:32 GMT"
         },
         {
           "Name": "Cache-Control",

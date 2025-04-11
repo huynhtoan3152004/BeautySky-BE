@@ -99,7 +99,8 @@ namespace BeautySky.Controllers
                 new Claim("email", user.Email),
                 new Claim("role", roleName),
                 new Claim("phone", user.Phone),
-                new Claim("address", user.Address)
+                new Claim("address", user.Address),
+                new Claim("point", user.Point.ToString()),
             };
 
             var token = new JwtSecurityToken(

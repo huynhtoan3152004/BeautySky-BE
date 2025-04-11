@@ -70,6 +70,15 @@ namespace BeautySky.Controllers
                     })
                 })
                 .ToListAsync();
+            //var completedOrdersCount = await _context.Orders.CountAsync(o => o.UserId == userId && o.Status == "Completed");
+            //var userPoints = completedOrdersCount; // Mỗi đơn hàng "Completed" = 1 điểm
+            //var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            //if (user != null)
+            //{
+            //    user.Point = userPoints;  // Cập nhật số điểm cho người dùng
+            //    _context.Users.Update(user);
+            //    await _context.SaveChangesAsync();
+            //}
 
             if (!orders.Any())
             {
@@ -85,6 +94,8 @@ namespace BeautySky.Controllers
             var orders = await _context.Orders
                 .Include(o => o.OrderProducts)
                 .Include(o => o.User)
+                .Include(o => o.Payment)
+                    .ThenInclude(p => p.PaymentType) // Thêm dòng này để lấy thông tin PaymentType
                 .Select(o => new
                 {
                     o.OrderId,
@@ -92,10 +103,21 @@ namespace BeautySky.Controllers
                     o.TotalAmount,
                     o.DiscountAmount,
                     o.FinalAmount,
-                    o.Status,        // Thêm status
+                    o.Status,
                     o.PaymentId,
                     o.CancelledDate,
                     o.CancelledReason,
+                    Payment = o.Payment != null ? new
+                    {
+                        o.Payment.PaymentId,
+                        o.Payment.PaymentTypeId,
+                        o.Payment.PaymentStatus,
+                        PaymentType = new
+                        {
+                            o.Payment.PaymentType.PaymentTypeId,
+                            o.Payment.PaymentType.PaymentTypeName
+                        }
+                    } : null,
                     User = new
                     {
                         o.User.UserId,
@@ -174,9 +196,7 @@ namespace BeautySky.Controllers
         }
 
 
-
         [Authorize] // Bảo vệ API, chỉ cho phép người dùng đã đăng nhập
-        [Authorize]
         [HttpPost("order-products")]
         public async Task<IActionResult> CreateOrder(int? promotionID, List<OrderProductRequest> products)
         {
@@ -186,15 +206,16 @@ namespace BeautySky.Controllers
                 return Unauthorized("Không tìm thấy thông tin người dùng.");
             }
 
-            if (!int.TryParse(userIdClaim.Value, out int userID))
+            var userID = int.Parse(userIdClaim.Value);
+            var user = await _context.Users.FindAsync(userID);
+
+            if (user == null)
             {
-                return Unauthorized("ID người dùng không hợp lệ.");
+                return NotFound("User not found");
             }
 
-            if (products == null || !products.Any())
-            {
-                return BadRequest("Danh sách sản phẩm trống");
-            }
+            // Lấy số điểm của người dùng
+            var userPoints = user.Point;
 
             var totalAmount = 0m;
             var orderProducts = new List<OrderProduct>();
@@ -225,6 +246,7 @@ namespace BeautySky.Controllers
 
                 // Giảm số lượng sản phẩm
                 product.Quantity -= item.Quantity;
+                
             }
 
             decimal discountAmount = 0m;
@@ -233,10 +255,29 @@ namespace BeautySky.Controllers
                 var promotion = await _context.Promotions.FirstOrDefaultAsync(p => p.PromotionId == promotionID);
                 if (promotion != null)
                 {
+                    // Kiểm tra nếu điểm người dùng đủ để sử dụng khuyến mãi
+                    if (promotion.Quantity <= 0 || promotion.IsActive == false)
+                    {
+                        return BadRequest("Out of Promotion or Promotion is inactive");
+                    }
+                    else if (userPoints < promotion.DiscountPercentage)
+                    {
+                        return BadRequest("You do not have enough points to use this promotion");
+                    }
+
+                    // Tính mức giảm giá và trừ điểm người dùng
                     discountAmount = totalAmount * (promotion.DiscountPercentage / 100);
+                    user.Point -= Convert.ToInt32(promotion.DiscountPercentage); // Trừ điểm tương ứng
+                    promotion.Quantity--;
+                    _context.Promotions.Update(promotion);
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return BadRequest("Invalid promotion");
                 }
             }
-
             var finalAmount = totalAmount - discountAmount;
 
             var order = new Order
@@ -263,9 +304,6 @@ namespace BeautySky.Controllers
 
             return Ok(new { order.OrderId, order.Status, totalAmount, discountAmount, finalAmount });
         }
-
-
-
 
 
         [HttpPost("cancel/{orderId}")]
@@ -312,6 +350,21 @@ namespace BeautySky.Controllers
                     }
                 }
 
+                if (order.PromotionId.HasValue)
+                {
+                    var promotion = await _context.Promotions.FirstOrDefaultAsync(p => p.PromotionId == order.PromotionId);
+                    if (promotion != null)
+                    {
+                        var user = await _context.Users.FindAsync(userId);
+                        // Hoàn lại điểm cho người dùng
+                        user.Point += Convert.ToInt32(promotion.DiscountPercentage);
+                        // Tăng lại số lượng khuyến mãi sau khi hủy
+                        promotion.Quantity++;
+                        _context.Promotions.Update(promotion);
+                        _context.Users.Update(user);
+                    }
+                }
+
                 // Cập nhật trạng thái đơn hàng với lý do từ FE
                 order.Status = "Cancelled";
                 order.CancelledDate = DateTime.Now;
@@ -334,11 +387,7 @@ namespace BeautySky.Controllers
             }
         }
 
-
-
-
     }
-
     public class OrderProductRequest
     {
         public int ProductID { get; set; }
