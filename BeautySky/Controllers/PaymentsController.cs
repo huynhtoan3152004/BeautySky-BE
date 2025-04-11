@@ -4,6 +4,7 @@ using BeautySky.Services;
 using BeautySky.Services.Vnpay;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Net;
 
 namespace BeautySky.Controllers
@@ -18,22 +19,18 @@ namespace BeautySky.Controllers
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
 
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-
         public PaymentsController(
             ProjectSwpContext context,
             IVnPayService vnPayService,
             ILogger<PaymentsController> logger,
             IConfiguration configuration,
-            IEmailService emailService,
-            IServiceScopeFactory serviceScopeFactory)
+            IEmailService emailService)
         {
             _context = context;
             _vnPayService = vnPayService;
             _logger = logger;
             _configuration = configuration;
             _emailService = emailService;
-            _serviceScopeFactory = serviceScopeFactory;
         }
 
         [HttpPost("create-payment")]
@@ -76,7 +73,7 @@ namespace BeautySky.Controllers
                 // Xử lý phản hồi từ VnPay để nhận thông tin thanh toán
                 var response = _vnPayService.PaymentExecute(Request.Query);
                 _logger.LogInformation("VNPay Callback Params: {Params}", string.Join(", ", Request.Query.Select(kvp => $"{kvp.Key}={kvp.Value}")));
-                var orderId = response.OrderId?.ToString() ?? "";
+                var orderId = response.OrderId?.ToString() ?? ""; 
                 var message = response.OrderDescription ?? "";
 
                 // Kiểm tra nếu thanh toán thành công
@@ -94,7 +91,7 @@ namespace BeautySky.Controllers
                                 _logger.LogInformation($"Payment for Order {orderIdInt} processed successfully via callback");
                                 var order = await _context.Orders.Include(o => o.User).FirstOrDefaultAsync(o => o.OrderId == orderIdInt);
                                 var payment = ((dynamic)okResult.Value).paymentId;
-                                return Ok(new { success = true, orderId = order.OrderId, paymentId = payment, message = "Thanh cong roi" });
+                                return Ok(new { success = true, orderId = order.OrderId, paymentId = payment, message = "Thanh cong roi"});
                             }
                             else if (result is NotFoundResult) // Nếu không tìm thấy đơn hàng
                             {
@@ -186,9 +183,6 @@ namespace BeautySky.Controllers
                 _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
 
-                // Gọi hàm để tự động chuyển trạng thái sang "Shipping" sau 30 giây
-                _ = UpdateOrderStatusAfterDelay(orderId);  // Sử dụng `_ =` để không chặn luồng chính
-
                 // Gửi email xác nhận thanh toán
                 if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
                 {
@@ -227,69 +221,42 @@ namespace BeautySky.Controllers
         }
 
 
-        [HttpPost("UpdateOrderStatusAfterDelay")]
-        public async Task UpdateOrderStatusAfterDelay(int orderId)
-        {
-            try
-            {
-                // Tạo một task riêng biệt để xử lý delay và cập nhật trạng thái
-                // Task này sẽ chạy độc lập với request hiện tại
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        // Chờ 5 giây trước khi thực hiện cập nhật
-                        await Task.Delay(TimeSpan.FromSeconds(5));
+        //[HttpPost("UpdateOrderStatusAfterDelay")]
+        //public async Task UpdateOrderStatusAfterDelay(int orderId)
+        //{
+        //    try
+        //    {
+        //        // Lấy lại đơn hàng từ database
+        //        var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-                        // Tạo scope mới để truy cập database sau khi delay
-                        using (var scope = _serviceScopeFactory.CreateScope())
-                        {
-                            var dbContext = scope.ServiceProvider.GetRequiredService<ProjectSwpContext>();
-                            var logger = scope.ServiceProvider.GetRequiredService<ILogger<PaymentsController>>();
+        //        if (order == null)
+        //        {
+        //            _logger.LogWarning($"Order {orderId} not found.");
+        //            return;
+        //        }
 
-                            // Lấy lại đơn hàng từ database
-                            var order = await dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+        //        // Kiểm tra nếu trạng thái đơn hàng là "Completed"
+        //        if (order.Status == "Completed")
+        //        {
+        //            // Chờ 30 giây (hoặc một khoảng thời gian khác)
+        //            await Task.Delay(TimeSpan.FromSeconds(30));
 
-                            if (order == null)
-                            {
-                                logger.LogWarning($"Order {orderId} not found when attempting to update status after delay.");
-                                return;
-                            }
+        //            // Cập nhật trạng thái của đơn hàng sang "Shipping"
+        //            order.Status = "Shipping";
+        //            order.ShippingDate = DateTime.Now;
 
-                            // Kiểm tra nếu trạng thái đơn hàng là "Completed"
-                            if (order.Status == "Completed")
-                            {
-                                // Cập nhật trạng thái của đơn hàng sang "Shipping"
-                                order.Status = "Shipping";
-                                order.ShippingDate = DateTime.Now;
+        //            // Lưu vào database
+        //            _context.Orders.Update(order);
+        //            await _context.SaveChangesAsync();
 
-                                // Lưu vào database
-                                dbContext.Orders.Update(order);
-                                await dbContext.SaveChangesAsync();
-
-                                logger.LogInformation($"Order {orderId} status updated to Shipping after 30 seconds.");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Sử dụng logger từ scope mới
-                        using (var scope = _serviceScopeFactory.CreateScope())
-                        {
-                            var logger = scope.ServiceProvider.GetRequiredService<ILogger<PaymentsController>>();
-                            logger.LogError(ex, $"Error updating order {orderId} status to Shipping after delay.");
-                        }
-                    }
-                });
-
-                // Phương thức này trả về ngay lập tức, không đợi task hoàn thành
-                return;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error initiating delayed update for order {orderId}.");
-            }
-        }
+        //            _logger.LogInformation($"Order {orderId} status updated to Shipping after 30 seconds.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error updating order {orderId} status to Shipping.");
+        //    }
+        //}
 
 
         [HttpPost("ProcessAndConfirmPayment")]
@@ -327,7 +294,7 @@ namespace BeautySky.Controllers
                     var payment = new Payment
                     {
                         UserId = order.UserId,
-                        PaymentTypeId = 1, // Giả sử là VnPay
+                        PaymentTypeId = 2, //SHIP COD
                         PaymentStatusId = 2, // Confirmed
                         PaymentDate = DateTime.Now
                     };
@@ -336,7 +303,7 @@ namespace BeautySky.Controllers
                     await _context.SaveChangesAsync();
 
                     order.PaymentId = payment.PaymentId;
-                    order.Status = "Completed";
+                    order.Status = "Shipping";
 
                     if (order.User != null)
                     {
@@ -376,80 +343,80 @@ namespace BeautySky.Controllers
             }
         }
 
-        //[HttpPost("start-shipping/{orderId}")]
-        //public async Task<IActionResult> StartShipping(int orderId)
-        //{
-        //    _logger.LogInformation($"Starting shipping process for Order ID: {orderId}");
+        [HttpPost("start-shipping/{orderId}")]
+        public async Task<IActionResult> StartShipping(int orderId)
+        {
+            _logger.LogInformation($"Starting shipping process for Order ID: {orderId}");
 
-        //    using var transaction = await _context.Database.BeginTransactionAsync();
-        //    try
-        //    {
-        //        var order = await _context.Orders
-        //            .Include(o => o.User)
-        //            .Include(o => o.Payment)
-        //            .FirstOrDefaultAsync(o => o.OrderId == orderId);
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var order = await _context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.Payment)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-        //        // Kiểm tra đơn hàng tồn tại
-        //        if (order == null)
-        //        {
-        //            return NotFound(new { success = false, message = "Không tìm thấy đơn hàng" });
-        //        }
+                // Kiểm tra đơn hàng tồn tại
+                if (order == null)
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
 
-        //        // Kiểm tra trạng thái đơn hàng
-        //        if (order.Status != "Completed")
-        //        {
-        //            return BadRequest(new
-        //            {
-        //                success = false,
-        //                message = "Đơn hàng chưa được thanh toán hoặc không ở trạng thái phù hợp để giao hàng"
-        //            });
-        //        }
+                // Kiểm tra trạng thái đơn hàng
+                if (order.Status != "Completed")
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Đơn hàng chưa được thanh toán hoặc không ở trạng thái phù hợp để giao hàng"
+                    });
+                }
 
-        //        // Cập nhật trạng thái đơn hàng thành Shipping
-        //        order.Status = "Shipping";
-        //        order.ShippingDate = DateTime.Now;
+                // Cập nhật trạng thái đơn hàng thành Shipping
+                order.Status = "Shipping";
+                order.ShippingDate = DateTime.Now;
 
-        //        await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-        //        // Gửi email thông báo đang giao hàng
-        //        if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
-        //        {
-        //            var emailBody = GenerateShippingEmailBody(order);
-        //            try
-        //            {
-        //                await _emailService.SendEmailAsync(
-        //                    order.User.Email,
-        //                    "Đơn hàng đang được giao - BeautySky",
-        //                    emailBody
-        //                );
-        //            }
-        //            catch (Exception emailEx)
-        //            {
-        //                _logger.LogError(emailEx, $"Error sending shipping notification email for Order ID: {orderId}");
-        //            }
-        //        }
+                // Gửi email thông báo đang giao hàng
+                if (order.User != null && !string.IsNullOrEmpty(order.User.Email))
+                {
+                    var emailBody = GenerateShippingEmailBody(order);
+                    try
+                    {
+                        await _emailService.SendEmailAsync(
+                            order.User.Email,
+                            "Đơn hàng đang được giao - BeautySky",
+                            emailBody
+                        );
+                    }
+                    catch (Exception emailEx)
+                    {
+                        _logger.LogError(emailEx, $"Error sending shipping notification email for Order ID: {orderId}");
+                    }
+                }
 
-        //        await transaction.CommitAsync();
+                await transaction.CommitAsync();
 
-        //        return Ok(new
-        //        {
-        //            success = true,
-        //            message = "Đơn hàng đã chuyển sang trạng thái đang giao hàng",
-        //            order = new
-        //            {
-        //                orderId = order.OrderId,
-        //                status = order.Status,
-        //                shippingDate = order.ShippingDate
-        //            }
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await transaction.RollbackAsync();
-        //        _logger.LogError(ex, $"Error starting shipping for Order ID {orderId}");
-        //        return StatusCode(500, new { success = false, message = "Có lỗi xảy ra khi xử lý giao hàng" });
-        //    }
-        //}
+                return Ok(new
+                {
+                    success = true,
+                    message = "Đơn hàng đã chuyển sang trạng thái đang giao hàng",
+                    order = new
+                    {
+                        orderId = order.OrderId,
+                        status = order.Status,
+                        shippingDate = order.ShippingDate
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, $"Error starting shipping for Order ID {orderId}");
+                return StatusCode(500, new { success = false, message = "Có lỗi xảy ra khi xử lý giao hàng" });
+            }
+        }
 
 
         [HttpPost("confirm-delivery/{orderId}")]
