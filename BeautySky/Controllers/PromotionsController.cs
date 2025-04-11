@@ -27,7 +27,7 @@ namespace BeautySky.Controllers
 
             foreach (var promo in promotions)
             {
-                if (promo.StartDate > currentTime || promo.EndDate < currentTime)
+                if (promo.StartDate > currentTime || promo.EndDate < currentTime || promo.Quantity <= 0)
                 {
                     // Nếu chưa đến hạn hoặc đã hết hạn thì tắt IsActive
                     if (promo.IsActive)
@@ -36,7 +36,7 @@ namespace BeautySky.Controllers
                         changesMade = true;
                     }
                 }
-                else if (promo.StartDate <= currentTime && promo.EndDate >= currentTime)
+                else if (promo.StartDate <= currentTime && promo.EndDate >= currentTime && promo.Quantity > 0)
                 {
                     // Nếu khuyến mãi đang trong thời gian hiệu lực thì bật IsActive
                     if (!promo.IsActive)
@@ -119,7 +119,7 @@ namespace BeautySky.Controllers
             if (updatedPromotion.DiscountPercentage > 0)
                 existingPromotion.DiscountPercentage = updatedPromotion.DiscountPercentage;
 
-            if (updatedPromotion.Quantity > 0)
+            if (updatedPromotion.Quantity >= 0)
                 existingPromotion.Quantity = updatedPromotion.Quantity;
 
             if (updatedPromotion.StartDate >= DateTime.Now)
@@ -186,6 +186,7 @@ namespace BeautySky.Controllers
             var availablePromotions = await _context.Promotions
                 .Where(p => p.IsActive == true && p.EndDate >= DateTime.Now && p.StartDate <= DateTime.Now) // Khuyến mãi còn hạn và có IsActive là true
                 .Where(p => p.DiscountPercentage <= user.Point) // Khuyến mãi có tỷ lệ giảm = số điểm người dùng có
+                .Where(p => p.Quantity > 0) // check số lượng
                 .Select(p => new
                 {
                     p.PromotionId,

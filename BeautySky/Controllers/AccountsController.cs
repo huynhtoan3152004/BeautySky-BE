@@ -133,7 +133,5 @@ namespace BeautySky.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-
     }
 }

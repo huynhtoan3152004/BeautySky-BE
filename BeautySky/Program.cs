@@ -97,6 +97,7 @@ namespace BeautySky
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     //ValidateLifetime = true, // set token thời hạn 3h theo AccountController và GoogleController 
+                    //ClockSkew = TimeSpan.Zero, // Tắt thời gian "dung sai", "dung sai là thời gian mà asp.net core cho phép token có hiệu lực thêm 5p"
                     ValidAudience = builder.Configuration["JWT:ValidAudience"],
                     ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
